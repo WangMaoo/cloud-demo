@@ -1,5 +1,7 @@
 package com.wmq.consumer.web;
 
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import com.wmq.consumer.client.UserClient;
 import com.wmq.consumer.pojo.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.client.ServiceInstance;
@@ -23,11 +25,11 @@ import java.util.List;
 @RequestMapping("consumer")
 public class ConsumerController {
 
-    @Autowired
+   /* @Autowired
     private RestTemplate restTemplate;
 
     @Autowired
-    private DiscoveryClient discoveryClient;
+    private DiscoveryClient discoveryClient;*/
 
 
     /*@GetMapping("{id}")
@@ -52,10 +54,30 @@ public class ConsumerController {
      * @param id
      * @return
      */
-    @GetMapping("{id}")
-    public User queryById(@PathVariable("id") Long id) {
+    /*@GetMapping("{id}")
+    @HystrixCommand(fallbackMethod = "queryByIdFallBack")
+    public String  queryById(@PathVariable("id") Long id) {
+        */
+    /**
+     * 验证Hystrix的熔断机制
+     *//*
+        if(id == 1){
+            throw new RuntimeException("太忙了");
+        }
         String url = "http://user-service/user/" + id;
-        return restTemplate.getForObject(url, User.class);
+        return restTemplate.getForObject(url, String.class);
+    }
+
+    public String queryByIdFallBack(Long id) {
+        return "网络太拥挤了，稍后重试";
+    }*/
+
+    @Autowired
+    private UserClient userClient;
+
+    @GetMapping("{id}")
+    public User  queryById(@PathVariable("id") Long id) {
+        return userClient.queryById(id);
     }
 
 }

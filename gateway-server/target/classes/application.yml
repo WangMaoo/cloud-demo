@@ -1,0 +1,33 @@
+server:
+  port: 10010 #服务端口
+spring:
+  application:
+    name: gateway-server #指定服务名
+  redis:
+    host: 192.168.164.134
+  cloud:
+    gateway:
+      routes:
+        - id: user-service # 当前路由的唯一标识
+          uri: lb://user-service # 路由的目标微服务,lb:代表负载均衡，user-service:代表服务id
+          predicates: # 断言
+            - Path=/user-service/** # 按照路径匹配的规则
+      default-filters: # 默认过滤项
+        - StripPrefix=1 # 路径映射成功后，转发到微服务前，去除路径的第一段
+        - name: Hystrix # 指定过滤工厂名称（可以是任意过滤工厂类型）
+          args: # 指定过滤的参数
+            name: fallbackcmd  # hystrix的指令名
+            fallbackUri: forward:/fallbackTest # 失败后的跳转路径
+        - name: RequestRateLimiter  # 请求数限流名字不能随便写
+          args:
+            key-resolver: "#{@ipKeyResolver}"    # 指定一个key生成器
+            redis-rate-limiter.replenishRate: 2   # 生成令牌的速率
+            redis-rate-limiter.burstCapacity: 2   # 桶的容量
+hystrix:
+  command:
+    default:
+      execution.isolation.thread.timeoutInMilliseconds: 1000 # 失败超时时长
+eureka:
+  client:
+    service-url:
+      defaultZone: http://127.0.0.1:10086/eureka,http://127.0.0.1:10087/eureka
