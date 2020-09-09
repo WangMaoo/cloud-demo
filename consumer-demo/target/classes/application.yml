@@ -3,7 +3,32 @@ server:
 spring:
   application:
     name: consumer # 应用名称
+  mvc:
+    servlet:
+      load-on-startup: 1
 eureka:
   client:
     service-url: # EurekaServer地址
       defaultZone: http://127.0.0.1:10086/eureka,http://127.0.0.1:10087/eureka
+ribbon:
+  eager-load:
+    enabled: true
+    clients:
+      - user-service
+  ReadTimeout: 600 # 读取超时时间
+  ConnectTimeout: 300 # 连接超时时间
+hystrix:
+  command:
+    default:
+      execution.isolation.thread.timeoutInMilliseconds: 1000
+feign:
+  hystrix:
+    enabled: true # 开启feign中的hystrix效果
+logging:
+  level:
+    com.wmq: debug
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*" # 暴露refresh接口

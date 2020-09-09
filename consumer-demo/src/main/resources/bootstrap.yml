@@ -1,0 +1,22 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: consumer
+  cloud:
+    config:
+      name: consumer # 配置文件的名称
+      profile: dev # 环境
+      label: master # 分支
+      discovery:
+        enabled: true # 通过注册中心寻找ConfigServer
+        service-id: config-server # ConfigServer的服务id
+  rabbitmq:
+    host: 192.168.164.134
+    username: leyou
+    password: 123321
+    virtual-host: /
+eureka:
+  client:
+    service-url:
+      defaultZone: http://127.0.0.1:10086/eureka/
